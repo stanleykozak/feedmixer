@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  app:
+    image: feedmixer-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - LANG=C.UTF-8
+      - LC_ALL=C.UTF-8
+      - PIPENV_VENV_IN_PROJECT=yes
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    user: nobody
+    entrypoint: ["pipenv", "run", "gunicorn"]
+    command: ["-b", ":8000", "feedmixer_wsgi"]
+    working_dir: /app
+    depends_on:
+      - app_install
+
+  app_install:
+    image: bitnami/minideb@sha256:03d145bf50918df2acd08346c600b0688f8b16521b5ea462f6b503fe3a2f010d
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: install
+    environment:
+      - LANG=C.UTF-8
+      - LC_ALL=C.UTF-8
+      - PIPENV_VENV_IN_PROJECT=yes
+    volumes:
+      - .:/app
